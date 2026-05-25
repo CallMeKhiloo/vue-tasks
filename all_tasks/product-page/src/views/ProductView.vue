@@ -1,38 +1,51 @@
 <script setup>
-import { computed, onMounted, onUnmounted } from 'vue'
-import ProductDetails from '../components/ProductDetails.vue'
-import ProductCard from '../components/ProductCard.vue'
+import { computed, onMounted, onUnmounted } from "vue";
+import { useRoute } from "vue-router";
+import { useProductStore } from "../stores/productStore";
+import ProductDetails from "../components/ProductDetails.vue";
+import ProductCard from "../components/ProductCard.vue";
 
-const props = defineProps({
-  products: {
-    type: Array,
-    required: true,
-  },
-  id: {
-    type: Number,
-    required: true,
-  },
-})
-defineEmits(['buy'])
+const route = useRoute();
+const productStore = useProductStore();
 
-const currentProduct = computed(() => props.products.find(p => p.id === props.id))
+const productId = computed(() => parseInt(route.params.id));
 
-// Exclude current item from related selection
-const relatedProducts = computed(() => props.products.filter(p => p.id !== props.id))
+const currentProduct = computed(() =>
+  productStore.getProductById(productId.value)
+);
 
-onMounted(() => console.log(`ProductView mounted for ID: ${props.id}`))
-onUnmounted(() => console.log("ProductView unmounted"))
+const relatedProducts = computed(() => {
+  return productStore.products.filter((p) => p.id != productId.value);
+});
+
+onMounted(async () => {
+  if (productStore.products.length == 0) {
+    await productStore.fetchProducts();
+  }
+  console.log(`ProductView mounted for ID: ${productId.value}`);
+});
+
+onUnmounted(() => console.log("ProductView unmounted"));
 </script>
 
 <template>
-  <div class="p-6 max-w-5xl mx-auto" v-if="currentProduct">
-    <ProductDetails :product="currentProduct" @buy="$emit('buy', currentProduct.id)" />
+  <div v-if="productStore.loading" class="text-center p-12 text-xl">
+    Loading product details...
+  </div>
+
+  <div v-else-if="currentProduct" class="p-6 max-w-5xl mx-auto">
+    <ProductDetails :product="currentProduct" />
 
     <h3 class="text-xl font-bold mt-12 mb-4">Related Products</h3>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <ProductCard v-for="item in relatedProducts" :key="item.id" :product="item" />
+      <ProductCard
+        v-for="item in relatedProducts"
+        :key="item.id"
+        :product="item"
+      />
     </div>
   </div>
+  
   <div v-else class="text-center p-12 text-error text-xl">
     Product not found!
   </div>

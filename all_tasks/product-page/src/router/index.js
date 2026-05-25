@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
 import ProductView from "@/views/ProductView.vue";
 import AboutView from "@/views/AboutView.vue";
+import CartView from "@/views/CartView.vue";
 
 const routes = [
   { path: "/", name: "home", component: HomeView },
@@ -9,9 +10,10 @@ const routes = [
     path: "/product/:id",
     name: "product",
     component: ProductView,
-    props: (route) => ({ id: Number(route.params.id) }),
-  }, // props: true passes route params as props
+    props: true,
+  },
   { path: "/about", name: "about", component: AboutView },
+  { path: "/cart", name: "cart", component: CartView }
 ];
 
 const router = createRouter({

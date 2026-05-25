@@ -1,21 +1,34 @@
 <script setup>
 import { onMounted, onUnmounted } from "vue";
-import CarouselBanner from "../components/CarouselBanner.vue";
-import ProductCard from "../components/ProductCard.vue";
+import CarouselBanner from "@/components/CarouselBanner.vue";
+import ProductCard from "@/components/ProductCard.vue";
+import { useProductStore } from "@/stores/productStore";
 
-const props = defineProps(["products"]);
+const productStore = useProductStore();
+const { fetchProducts, decreaseStock, getProductById } = productStore;
 
-onMounted(() =>
-  console.log(`HomeView mounted — ${props.products.length} products loaded`),
-);
+onMounted(async () => {
+  await productStore.fetchProducts();
+  console.log(
+    `HomeView mounted — ${productStore.products.length} products loaded`,
+  );
+});
+
 onUnmounted(() => console.log("HomeView unmounted"));
 </script>
 
 <template>
-  <div class="p-6 max-w-6xl mx-auto">
+  <div>
     <CarouselBanner />
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-      <ProductCard v-for="item in products" :key="item.id" :product="item" />
+    <p v-if="productStore.loading">Loading products...</p>
+    <p v-else-if="productStore.error">Error: {{ productStore.error }}</p>
+    
+    <div v-else class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+      <ProductCard 
+        v-for="product in productStore.products" 
+        :key="product.id" 
+        :product="product" 
+      />
     </div>
   </div>
 </template>

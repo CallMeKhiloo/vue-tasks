@@ -1,6 +1,8 @@
 <script setup>
 import { onMounted, onUnmounted } from "vue";
+import { useCartStore } from "@/stores/cartStore";
 defineProps(["product"]);
+const cartStore = useCartStore();
 
 onMounted(() => console.log("ProductCard mounted"));
 onUnmounted(() => console.log("ProductCard unmounted"));
@@ -17,6 +19,9 @@ onUnmounted(() => console.log("ProductCard unmounted"));
         </div>
       </h2>
       <p class="font-bold text-lg">${{ product.price }}</p>
+      <p class="text-sm text-muted-foreground">
+        {{ product.stock }} left
+      </p>
       <div class="card-actions justify-end">
         <router-link
           :to="`/product/${product.id}`"
@@ -24,6 +29,13 @@ onUnmounted(() => console.log("ProductCard unmounted"));
         >
           View Product
         </router-link>
+        <button
+          class="btn btn-sm btn-primary"
+          :disabled="product.stock === 0"
+          @click="cartStore.addToCart(product)"
+        >
+          Add to Cart
+        </button>
       </div>
     </div>
   </div>

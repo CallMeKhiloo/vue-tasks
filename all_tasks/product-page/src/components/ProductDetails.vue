@@ -1,12 +1,16 @@
 <script setup>
 import { computed, onMounted, onUnmounted } from "vue";
+import { useCartStore } from "../stores/cartStore";
+
 const props = defineProps(["product"]);
-defineEmits(["buy"]);
+
+const cartStore = useCartStore();
 
 const discountedPrice = computed(() => {
-  return (
-    props.product.price - props.product.price * (props.product.discount / 100)
-  );
+  return props.product.discount
+    ? parseInt(props.product.price) -
+        parseInt(props.product.price) * (parseInt(props.product.discount) / 100)
+    : props.product.price;
 });
 
 onMounted(() => console.log("ProductDetails mounted"));
@@ -44,8 +48,8 @@ onUnmounted(() => console.log("ProductDetails unmounted"));
       </p>
 
       <button
-        @click="$emit('buy', product.id)"
-        :disabled="product.stock === 0"
+        @click="cartStore.addToCart(product)"
+        :disabled="product.stock == 0"
         class="btn btn-primary"
       >
         {{ product.stock > 0 ? "Buy Now" : "Out of Stock" }}
